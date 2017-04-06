@@ -1,3 +1,5 @@
+#Setup e testes simples com OvS + DPDK #
+
 Passo a passo para executar testes de comunicação VM-VM no mesmo host físico e
 em hosts diferentes utilizando OvS e DPDK.
 
@@ -22,8 +24,9 @@ isto, o prefixo `sudo` será omitido no decorrer do tutorial.
 
 - Mudar para o diretório do DPDK
 
-- Exportar váriavel de ambiente DPDK_DIR (contendo o diretório que contém os
+- Exportar váriavel de ambiente `DPDK_DIR` (contendo o diretório que contém os
   arquivos DPDK).
+
         export DPDK_DIR=$(pwd)
 
 - (Opcional) Editar opção `CONFIG_RTE_BUILD_SHARED_LIB=y` no arquivo `$DPDK_DIR/config/common_base` para utilizar bibliotecas compartilhadas.
