@@ -4,17 +4,19 @@ em hosts diferentes utilizando OvS e DPDK.
 Esses scripts se baseiam nas seguintes versões de software:
 - DPDK 16.11
 - Open vSwitch 2.7
-- QEMU 2.?
+- QEMU >= 2.5
 
 A maioria dos comandos a serem executados devem ser executados com privilégios. Dito
 isto, o prefixo `sudo` será omitido no decorrer do tutorial.
 
 ### Instalação DPDK 16.11 ###
 
-- Instalar make e gcc (para dependências adicionais por favor checar
-  http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html)
+- Conferir se todas as dependências citadas [aqui](http://dpdk.org/doc/guides/linux_gsg/sys_reqs.html) foram atendidas.
+
+- Instalar make e gcc
 
 - Fazer download do DPDK 16.11 e descompactar
+
         wget https://fast.dpdk.org/rel/dpdk-16.11.1.tar.xz
         tar -xf dpdk-16.11.1.tar.xz
 
@@ -26,7 +28,8 @@ isto, o prefixo `sudo` será omitido no decorrer do tutorial.
 
 - (Opcional) Editar opção `CONFIG_RTE_BUILD_SHARED_LIB=y` no arquivo `$DPDK_DIR/config/common_base` para utilizar bibliotecas compartilhadas.
 
-- Configurar e instalar o DPDK com o target desejado (nesse caso x86_64-native-linuxapp-gcc):
+- Configurar e instalar o DPDK com o target desejado (nesse caso `x86_64-native-linuxapp-gcc`):
+
         export DPDK_TARGET=x86_64-native-linuxapp-gcc
         export DPDK_BUILD=$DPDK_DIR/$DPDK_TARGET
         make install T=$DPDK_TARGET DESTDIR=install`
@@ -45,30 +48,35 @@ isto, o prefixo `sudo` será omitido no decorrer do tutorial.
 - Verificar se todas as dependências listadas [aqui](http://docs.openvswitch.org/en/latest/intro/install/general/#general-build-reqs) foram atendidas.
 
 - Fazer download do OvS 2.7 e descompactar:
+
         wget http://openvswitch.org/releases/openvswitch-2.7.0.tar.gz
         tar -xf openvswitch-2.7.0.tar.gz
 
 - Mudar para o diretório do OvS.
 
 - Configurar o pacote para usar DPDK e compilar:
+
         ./configure --with-dpdk=$DPDK_DIR
         make
 
-!!! - Caso ocorram erros, checar o [manual de instalação](http://docs.openvswitch.org/en/latest/intro/install/dpdk/)
+!!! - Caso ocorram erros, checar o [manual de instalação](http://docs.openvswitch.org/en/latest/intro/install/dpdk/).
 
 ### Instalação QEMU ###
 
 Instalar o QEMU pelo gerenciador de pacotes padrão
+
 - Fedora, CentOS, RHEL
+
         yum install qemu-kvm
 
 - Ubuntu e Debian-based
+
         apt-get install qemu-kvm
 
 Para suporte a vhost, é necessário QEMU >= 2.2. Caso a versão instalada seja
 muito antiga, é possível compilar o QEMU manualmente. A compilação do QEMU é
 simples, apenas há várias dependências que devem ser instaladas previamente.
-Para instalar as dependências e fazer a compilação, seguir este [tutorial](https://mike632t.wordpress.com/2014/05/03/compiling-qemu/)
+Para instalar as dependências e fazer a compilação, seguir este [tutorial](https://mike632t.wordpress.com/2014/05/03/compiling-qemu/).
 
 ### Configurações do ambiente ###
 
@@ -91,38 +99,38 @@ Para instalar as dependências e fazer a compilação, seguir este [tutorial](ht
   do pacote `hugepages`. É necessário reiniciar a máquina para que a reserva das
   páginas seja feita.
 
-* - Hugepages de 2MB também podem ser utilizadas, e também podem ser alocadas em
+OBS: Hugepages de 2MB também podem ser utilizadas, e também podem ser alocadas em
 tempo de execução.
 
 ### Scripts auxiliares ###
 
 Alguns scripts foram criados para auxiliar nos testes a seguir.
 
-    -`export-vars.sh` : Exporta todas as variáveis de ambiente necessárias para a
-                       execução dos comandos dos outros scripts. Precisa ser
-                       rodado como `source export-vars.sh`
+-`export-vars.sh` : Exporta todas as variáveis de ambiente necessárias para a
+                   execução dos comandos dos outros scripts. Precisa ser
+                   rodado como `source export-vars.sh`
 
-    -`configure-DPDK.sh` : Configura a máquina para o uso do DPDK. Monta as
-                          hugepages reservadas, carrega os módulos necessários e
-                          associa 1 interface de rede ao driver necessário para
-                          a execução do DPDK.
+-`configure-DPDK.sh` : Configura a máquina para o uso do DPDK. Monta as
+                      hugepages reservadas, carrega os módulos necessários e
+                      associa 1 interface de rede ao driver necessário para
+                      a execução do DPDK.
 
-    -`start-vhost-VV.sh` : Configura o OvS. Cria diretórios necessários para a
-                          execução do OvS, bem como cria o banco de dados,
-                          inicia o servidor e inicia os processos do OvS com
-                          DPDK. Também cria uma bridge "br0" com 3 portas DPDK
-                          associadas, uma física (dpdk0) e duas do tipo vhost
-                          (vhost-user1 e vhost-user2).
+-`start-vhost-VV.sh` : Configura o OvS. Cria diretórios necessários para a
+                      execução do OvS, bem como cria o banco de dados,
+                      inicia o servidor e inicia os processos do OvS com
+                      DPDK. Também cria uma bridge "br0" com 3 portas DPDK
+                      associadas, uma física (dpdk0) e duas do tipo vhost
+                      (vhost-user1 e vhost-user2).
 
-    -`start-vhost-VPPV.sh` : Similar ao script `start-vhost-VV.sh`, porém cria
-                            apenas 1 porta vhost e cria regras de fluxo para
-                            encaminhar pacotes entre a porta física e a porta
-                            virtual diretamente (usada no caso de VMs em hosts
-                            diferentes).
+-`start-vhost-VPPV.sh` : Similar ao script `start-vhost-VV.sh`, porém cria
+                        apenas 1 porta vhost e cria regras de fluxo para
+                        encaminhar pacotes entre a porta física e a porta
+                        virtual diretamente (usada no caso de VMs em hosts
+                        diferentes).
 
-    -`start-vm1.sh` e `start-vm2.sh` : Levantam as VMs com as configurações
-                                      necessárias para rodar com OvS e DPDK
-                                      vhost.
+-`start-vm1.sh` e `start-vm2.sh` : Levantam as VMs com as configurações
+                                  necessárias para rodar com OvS e DPDK
+                                  vhost.
 
 ### Teste de comunicação VM-VM no mesmo host físico ###
 
@@ -165,7 +173,8 @@ diferente ou um diretório diferente, basta alterar os scripts `start-vm1.sh` e/
   respectivamente, do PC local. Tendo feito isso,	basta executar o vncviewer na
   máquina local
 
-	         vncviewer localhost:5901` e `vncviewer localhost:5902
+	         vncviewer localhost:5901
+           vncviewer localhost:5902
 
 - Depois, basta atribuir IPs adequados para as interfaces de rede das VMs e elas
   devem ser capazes de se pingarem.
