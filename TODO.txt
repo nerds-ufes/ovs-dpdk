@@ -1,0 +1,1 @@
+- Alterar os scripts para os novos comandos do OvS 2.7
